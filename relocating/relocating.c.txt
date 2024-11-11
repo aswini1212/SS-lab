@@ -1,0 +1,111 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+ char progname[10],starting_add[10],length[10],input[10],bitmask[12],bit[12]={0};
+ int PROGADDR;
+ FILE *fp1,*fp2;
+ void convert(char h[12]);
+ 
+ int main()
+ {
+     fp1=fopen("input.txt","r");
+     fp2=fopen("output.txt","w");
+     
+     printf("Enter the actual adress:");
+     scanf("%x",&PROGADDR);
+     
+     fscanf(fp1,"%s",input);
+     fprintf(fp2,"\n");
+     fprintf(fp2,"ADDRESS\tCONTENT\n");
+     fprintf(fp2,"\n");
+     
+     while(strcmp(input,"E")!=0)
+     {
+         if(strcmp(input,"H")==0)
+         {
+             fscanf(fp1,"%s",progname);
+             fscanf(fp1,"%hhX",starting_add);
+             fscanf(fp1,"%hhX",length);
+             fscanf(fp1,"%s",input);
+         }
+         
+         
+         int address,tlen,opcode,addr,actual;
+         if(strcmp(input,"T")==0)
+         {
+             fscanf(fp1,"%x",&address);
+             fscanf(fp1,"%x",&tlen);
+             fscanf(fp1,"%s",bitmask);
+             address+=PROGADDR;
+             convert(bitmask);
+             
+             for(int i=0;i< strlen(bit);i++)
+             {
+                 fscanf(fp1,"%x",&opcode);
+                 fscanf(fp1,"%x",&addr);
+                 if(bit[i]=='0')
+                 {
+                     actual=addr;
+                 }
+                 else if(bit[i]=='1')
+                 {
+                     actual=addr+PROGADDR;
+                 }
+                 
+                 fprintf(fp2,"\n%x\t%x%x",address,opcode,actual);
+                 address=address+3;
+             }
+             
+             fscanf(fp1,"%s",input);
+             
+         }
+     }
+     fclose(fp1);
+     fclose(fp2);
+     return 0;
+ }
+ 
+ void convert(char h[12])
+ {
+     strcpy(bit, "");
+     for(int i=0;i<strlen(h);i++)
+     {
+         switch(h[i])
+         {
+           case '0':
+                strcat(bit, "0"); break;
+            case '1':
+                strcat(bit, "1"); break;
+            case '2':
+                strcat(bit, "10"); break;
+            case '3':
+                strcat(bit, "11"); break;
+            case '4':
+                strcat(bit, "100"); break;
+            case '5':
+                strcat(bit, "101"); break;
+            case '6':
+                strcat(bit, "110"); break;
+            case '7':
+                strcat(bit, "111"); break;
+            case '8':
+                strcat(bit, "1000"); break;
+            case '9':
+                strcat(bit, "1001");break; 
+            case 'A':
+                strcat(bit, "1010"); break;
+            case 'B':
+                strcat(bit, "1011"); break;
+            case 'C':
+                strcat(bit, "1100"); break;
+            case 'D':
+                strcat(bit, "1101"); break;
+            case 'E':
+                strcat(bit, "1110"); break;
+            case 'F':
+                strcat(bit, "1111"); break;            
+         }
+     }
+     //return 0;
+ }
+ 
