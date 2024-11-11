@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+FILE *fp1, *fp2;
+char record[100];
+
+void read_head() {
+    char pname[10], verify[10];
+    fscanf(fp1, "%s", record);
+    
+    int i = 2;
+    while (record[i] != '^') {
+        pname[i - 2] = record[i];
+        i++;
+    }
+    pname[i - 2] = '\0'; // Null-terminate pname
+    
+    printf("Enter the name of the program: ");
+    scanf(" %[^\n]", verify);
+    
+    if (strcmp(pname, verify) != 0) {
+        printf("Invalid name\n");
+        exit(0);
+    } else {
+        printf("Program name: %s\n", pname);
+    }
+    fscanf(fp1, "%s", record);
+}
+
+int main() {
+    fp1 = fopen("input1.txt", "r");
+    fp2 = fopen("output1.txt", "w");
+    
+    if (fp1 == NULL || fp2 == NULL) {
+        printf("Error opening files.\n");
+        exit(1);
+    }
+    
+    read_head();
+    
+    while (record[0] != 'E') {
+        int i = 2;
+        char start_add[10];
+        
+        while (record[i] != '^') {
+            start_add[i - 2] = record[i];
+            i++;
+        }
+        start_add[i - 2] = '\0'; // Null-terminate start_add
+        
+        printf("Starting address is %s\n", start_add);
+        int address = atoi(start_add);
+        
+        i += 4; // Skip the length field
+        
+        while (i < strlen(record) - 1) {
+            if (record[i] != '^') {
+                printf("%06d\t%c%c\n", address, record[i], record[i + 1]);
+                fprintf(fp2, "%06d\t%c%c\n", address, record[i], record[i + 1]);
+                
+                i += 2; // Move to the next byte
+                address++; // Increment address by 1
+            } else {
+                i++;
+            }
+        }
+        
+        printf("\n");
+        fprintf(fp2, "\n");
+        fscanf(fp1, "%s", record);
+    }
+    
+    fclose(fp1);
+    fclose(fp2);
+    
+    printf("The program is carried out successfully\n");
+    return 0;
+}
