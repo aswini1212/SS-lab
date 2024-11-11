@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+ int main()
+ {
+     char label[10],opcode[10],operand[10],loc[10],code[10],mnemonic[10];
+     int start,length,prevadd,finadd;
+     
+     FILE *fp1=fopen("intermediate.txt","r");
+     FILE *fp2=fopen("optab.txt","r");
+     FILE *fp3=fopen("symtab.txt","r");
+     FILE *fp4=fopen("output.txt","w");
+     FILE *fp5=fopen("object.txt","w");
+     
+     //calculating the final address and prev address
+     fscanf(fp1,"%s\t%s\t%s\t%s",loc,label,opcode,operand);
+     while(strcmp(opcode,"END")!=0)
+     {
+         prevadd=atoi(loc);
+         fscanf(fp1,"%s\t%s\t%s\t%s",loc,label,opcode,operand);
+     }
+     finadd=atoi(operand);
+     fclose(fp1);
+     
+      fp1=fopen("intermediate.txt","r");
+      fscanf(fp1,"%s\t%s\t%s\t%s",loc,label,opcode,operand);
+       if(strcmp(opcode,"START")==0)
+       {
+           start=atoi(operand);
+           fprintf(fp4,"%s\t%s\t%s\t%s\t %s\n",loc,label,opcode,operand,"**");
+           fprintf(fp5,"H^%s^%06d^%06X",label,atoi(operand),finadd-atoi(operand));
+           fprintf(fp5,"T^%06d^%06X",atoi(operand),prevadd-atoi(operand));
+           fscanf(fp1,"%s\t%s\t%s\t%s",loc,label,opcode,operand);
+       }
+      
+      
+      
+      while(strcmp(opcode,"END")!=0)
+      {
+          if(strcmp(opcode,"BYTE")==0)
+          {
+              fprintf(fp4,"%s\t%s\t%s\t%s\t",loc,label,opcode,operand);
+              fprintf(fp5,"^");
+              length=strlen(operand)-3;
+              for(int i=2;i<length-2;i++)
+              {
+                  fprintf(fp4,"%X",operand[i]);
+                  fprintf(fp5,"%X",operand[i]);
+              }
+          }
+          else if(strcmp(opcode,"WORD")==0)
+          {
+              fprintf(fp4,"%s\t%s\t%s\t%s\t%06d\n",loc,label,opcode,operand,atoi(operand));
+              fprintf(fp5,"^%06d",atoi(operand));
+          }
+          else if(strcmp(opcode,"RESB")==0 || strcmp(opcode,"RESW")==0)
+          {
+               fprintf(fp4,"%s\t%s\t%s\t%s\t",loc,label,opcode,operand);
+          }
+          else
+          {
+               fprintf(fp4,"%s\t%s\t%s\t%s\t",loc,label,opcode,operand);
+               if(strcmp(opcode,"END")!=0)
+               {
+                   rewind(fp2);
+                   fscanf(fp2,"%s\t%s",code,mnemonic);
+                   while(strcmp(code,opcode)!=0)
+                   {
+                       fscanf(fp2,"%s\t%s",code,mnemonic);
+                   }
+                   fprintf(fp4,"%s",mnemonic);
+                   fprintf(fp5,"%s",mnemonic);
+                   
+                   rewind(fp3);
+                   fscanf(fp3,"%s\t%s",code,mnemonic);
+                   while(strcmp(code,operand)!=0)
+                   {
+                       fscanf(fp3,"%s\t%s",code,mnemonic);
+                   }
+                   fprintf(fp4,"%s",mnemonic);
+                   fprintf(fp5,"%s",mnemonic);
+                   
+                   
+             }
+          }
+          fscanf(fp1,"%s\t%s\t%s\t%s",loc,label,opcode,operand);
+      }
+     fprintf(fp4,"%s\t%s\t%s\t%s\t",loc,label,opcode,operand);
+     fprintf(fp5,"E^%06d",start);
+     fclose(fp1);
+     fclose(fp2);
+     fclose(fp3);
+     fclose(fp4);
+     fclose(fp5);
+     return 0;
+ }
